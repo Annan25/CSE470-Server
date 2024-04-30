@@ -221,6 +221,87 @@ async function run() {
     });
 
 
+    // GET all selling cars
+    app.get('/sellingCars', async (req, res) => {
+      try {
+        const result = await sellingCarCollection.find().toArray();
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+      }
+    });
+
+    // GET a specific selling car by ID
+    app.get('/sellingCars/:sellingCarId', async (req, res) => {
+      const sellingCarId = req.params.sellingCarId;
+
+      try {
+        const result = await sellingCarCollection.findOne({ _id: new ObjectId(sellingCarId) });
+        if (result) {
+          res.send(result);
+        } else {
+          res.status(404).send('Selling car not found');
+        }
+      } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+      }
+    });
+
+    // PUT (update) a selling car by ID
+    app.put('/sellingCars/:sellingCarId', async (req, res) => {
+      const sellingCarId = req.params.sellingCarId;
+      const updatedSellingCarData = req.body;
+
+      try {
+        const result = await sellingCarCollection.updateOne(
+          { _id: new ObjectId(sellingCarId) },
+          { $set: updatedSellingCarData }
+        );
+
+        if (result.modifiedCount > 0) {
+          res.send('Selling car updated successfully');
+        } else {
+          res.status(404).send('Selling car not found');
+        }
+      } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+      }
+    });
+
+    // POST a new selling car
+    app.post('/sellingCars', async (req, res) => {
+      try {
+        const newSellingCar = req.body;
+        const result = await sellingCarCollection.insertOne(newSellingCar);
+        res.status(201).send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+      }
+    });
+
+    // DELETE a selling car by ID
+    app.delete('/sellingCars/:sellingCarId', async (req, res) => {
+      const sellingCarId = req.params.sellingCarId;
+
+      try {
+        const result = await sellingCarCollection.deleteOne({ _id: new ObjectId(sellingCarId) });
+
+        if (result.deletedCount > 0) {
+          res.send('Selling car deleted successfully');
+        } else {
+          res.status(404).send('Selling car not found');
+        }
+      } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+      }
+    });
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
